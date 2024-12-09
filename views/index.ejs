@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensor Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <h1>Sensor Dashboard</h1>
+    
+    <div class="section">
+      <div class="grid-container">
+        <% temperatureSensors.forEach(sensor => { %>
+          <% 
+            const tempState = parseFloat(sensor.state);
+            const isDanger = tempState < 30;
+          %>
+          <div class="tile <%= isDanger ? 'danger' : '' %>">
+            <h3><%= sensor.attributes.friendly_name %></h3>
+            <div class="value">
+              <%= sensor.state %><span class="unit"><%= sensor.attributes.unit_of_measurement || '' %></span>
+            </div>
+            <div class="last-changed">Updated <%= sensor.time_ago %></div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+    
+    <div class="section">
+      &nbsp;
+      <div class="grid-container">
+        <% humiditySensors.forEach(sensor => { %>
+          <% 
+            const humidityState = parseFloat(sensor.state);
+            const isDanger = humidityState > 40;
+          %>
+          <div class="tile <%= isDanger ? 'danger' : '' %>">
+            <h3><%= sensor.attributes.friendly_name %></h3>
+            <div class="value">
+              <%= sensor.state %><span class="unit"><%= sensor.attributes.unit_of_measurement || '' %></span>
+            </div>
+            <div class="last-changed">Updated <%= sensor.time_ago %></div>
+          </div>
+        <% }) %>
+      </div>
+    </div>   
+    <div class="section">
+      &nbsp;
+      <div class="grid-container">
+        <% airQualitySensors.forEach(sensor => { %>
+          <% 
+            const entityId = sensor.entity_id.toLowerCase();
+            const sensorState = parseFloat(sensor.state);
+            const isAQI = entityId.includes('aqi') && sensorState > 60;
+            const isIndoorAirQuality = entityId.includes('indoor_air_quality') && sensorState < 60;
+            const isDanger = isAQI || isIndoorAirQuality;
+          %>
+          <div class="tile <%= isDanger ? 'danger' : '' %>">
+            <h3><%= sensor.attributes.friendly_name %></h3>
+            <div class="value">
+              <%= sensor.state %><span class="unit"><%= sensor.attributes.unit_of_measurement || '' %></span>
+            </div>
+            <div class="last-changed">Updated <%= sensor.time_ago %></div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+  <script>
+    const ws = new WebSocket(`ws://${window.location.host}`);
+    
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      updateDashboard(data);
+    };
+  
+    function updateDashboard(data) {
+      ['temperatureSensors', 'humiditySensors', 'airQualitySensors'].forEach(sensorType => {
+        const containers = document.querySelectorAll('.grid-container');
+        const container = containers[
+          sensorType === 'temperatureSensors' ? 0 : 
+          sensorType === 'humiditySensors' ? 1 : 2
+        ];
+        
+        container.innerHTML = data[sensorType].map(sensor => {
+          const isDanger = sensorType === 'temperatureSensors' ? sensor.state < 30 :
+                          sensorType === 'humiditySensors' ? sensor.state > 40 :
+                          (sensor.entity_id.toLowerCase().includes('aqi') && sensor.state > 60) || 
+                          (sensor.entity_id.toLowerCase().includes('indoor_air_quality') && sensor.state < 60);
+  
+          return `
+            <div class="tile ${isDanger ? 'danger' : ''}">
+              <h3>${sensor.attributes.friendly_name}</h3>
+              <div class="value">
+                ${sensor.state}<span class="unit">${sensor.attributes.unit_of_measurement || ''}</span>
+              </div>
+              <div class="last-changed">Updated ${sensor.time_ago}</div>
+            </div>
+          `;
+        }).join('');
+      });
+    }
+  </script>
+</body>
+</html>
