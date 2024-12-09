@@ -30,7 +30,7 @@ Before you begin, ensure you have the following installed:
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/ha-sensor-dashboard.git
+   git clone https://github.com/drkpxl/HomeAssistantFirehose
    cd ha-sensor-dashboard
    ```
 
@@ -159,6 +159,3 @@ Contributions are welcome! Please:
 - Regularly update your dependencies
 - Run `npm audit` periodically to check for vulnerabilities
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
