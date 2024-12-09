@@ -2,6 +2,9 @@
 
 A real-time dashboard that displays sensor data from your Home Assistant instance, focusing on temperature, humidity, and air quality metrics. The dashboard updates automatically through WebSocket connections and provides an easy-to-read interface for monitoring your home environment.
 
+
+![Screenshot](public/Screenshot-2024-12-09-1-34-26 PM.png)
+
 ## Features
 
 - Real-time sensor data updates via WebSocket connection
