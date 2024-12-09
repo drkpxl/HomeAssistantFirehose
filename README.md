@@ -75,7 +75,7 @@ The `.env` file contains several configurable options:
 
 2. Open your browser and navigate to:
    ```
-   http://localhost:3000
+   http://localhost:3015
    ```
 
 ## Dashboard Features

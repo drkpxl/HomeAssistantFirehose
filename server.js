@@ -10,7 +10,7 @@ const http = require('http');
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3015;
 const dataPath = path.join(__dirname, process.env.DATA_PATH);
 
 // Parse comma-separated environment variables into arrays
