@@ -56,29 +56,7 @@ jspm_packages/
 .next/
 out/
 
-# Nuxt.js
-.nuxt/
-dist/
 
-# Vuepress
-.vuepress/dist
-
-# Gatsby files
-.cache/
-public/
-
-# Vue files
-dist/
-
-# Svelte files
-__sapper__/
-sveltekit-output/
-
-# Django stuff:
-*.pyc
-*.pyo
-__pycache__/
-.db.sqlite3
 
 # IDE/Editor specific
 .vscode/
@@ -97,9 +75,37 @@ Desktop.ini
 
 # Local project files
 output.json
+.aidigestignore
+codebase.md
 
 
+```
 
+# docker-compose.yml
+
+```yml
+
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "3015:3015"
+```
+
+# Dockerfile
+
+```
+FROM node:20.18-alpine
+WORKDIR /app
+# Install curl
+RUN apk add --no-cache curl
+
+COPY package*.json ./
+RUN npm install
+COPY . .
+EXPOSE 3015
+CMD ["npm", "run", "start"]
 ```
 
 # package.json
@@ -118,13 +124,19 @@ output.json
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "ws": "^8.18.0"
   }
 }
 
 ```
+
+# public/Screenshot-2024-12-09-1-34-26 PM.png
+
+This is a binary file of the type: Image
 
 # public/styles.css
 
@@ -238,44 +250,291 @@ output.json
   }
 ```
 
+# README.md
+
+```md
+# Home Assistant Sensor Dashboard
+
+A real-time dashboard that displays sensor data from your Home Assistant instance, focusing on temperature, humidity, and air quality metrics. The dashboard updates automatically through WebSocket connections and provides an easy-to-read interface for monitoring your home environment.
+
+
+![Screenshot](public/Screenshot-2024-12-09-1-34-26 PM.png)
+
+## Features
+
+- Real-time sensor data updates via WebSocket connection
+- Automatic data fetching every 15 minutes (configurable)
+- Clean, responsive dashboard interface
+- Color-coded tiles for quick status identification
+- Support for temperature, humidity, and air quality sensors
+- Configurable sensor filtering and display options
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+- Node.js (version 14 or higher)
+- npm (usually comes with Node.js)
+- A running Home Assistant instance
+- A Home Assistant Long-Lived Access Token
+
+### Getting Your Home Assistant Access Token
+
+1. In your Home Assistant interface, click on your user profile (bottom left)
+2. Scroll to the bottom and click "Create Token"
+3. Give your token a name (e.g., "Sensor Dashboard")
+4. Copy the token immediately - you won't be able to see it again
+
+## Installation
+
+1. Clone this repository:
+   \`\`\`bash
+   git clone https://github.com/drkpxl/HomeAssistantFirehose
+   cd ha-sensor-dashboard
+   \`\`\`
+
+2. Install dependencies:
+   \`\`\`bash
+   npm install
+   \`\`\`
+
+3. Set up your environment:
+   \`\`\`bash
+   cp sample.env .env
+   \`\`\`
+
+4. Edit `.env` with your specific configuration:
+   - Replace `your_long_lived_access_token_here` with your Home Assistant token
+   - Update `HOST` if your Home Assistant isn't at `homeassistant.local`
+   - Modify other settings as needed
+
+## Configuration Options
+
+The `.env` file contains several configurable options:
+
+### Server Settings
+- `PORT`: The port your dashboard will run on (default: 3000)
+- `HOST`: Your Home Assistant host address
+- `API_PORT`: Home Assistant API port (default: 8123)
+- `UPDATE_INTERVAL`: How often to fetch new data (default: */15 * * * *)
+
+### Sensor Filtering
+- `EXCLUDED_TEMPERATURE_KEYWORDS`: Comma-separated list of keywords to exclude from temperature sensors
+- `EXCLUDED_TEMPERATURE_ENTITIES`: Specific entity IDs to exclude
+- `TEMPERATURE_IDENTIFIERS`: Keywords to identify temperature sensors
+- `HUMIDITY_IDENTIFIERS`: Keywords to identify humidity sensors
+- `AIR_QUALITY_IDENTIFIERS`: Keywords to identify air quality sensors
+
+## Running the Dashboard
+
+1. Start the server:
+   \`\`\`bash
+   npm start
+   \`\`\`
+
+2. Open your browser and navigate to:
+   \`\`\`
+   http://localhost:3015
+   \`\`\`
+
+## Dashboard Features
+
+### Temperature Sensors
+- Displays all temperature sensors not excluded by your configuration
+- Shows warning colors for temperatures below 30°C
+- Updates in real-time
+
+### Humidity Sensors
+- Shows all humidity sensors
+- Warning colors for humidity above 40%
+- Real-time updates
+
+### Air Quality Sensors
+- Displays AQI, VOC, and indoor air quality sensors
+- Warning colors for:
+  - AQI above 60
+  - Indoor air quality below 60
+- Real-time updates
+
+## Customizing the Dashboard
+
+### Modifying the Layout
+Edit `views/index.ejs` to change the dashboard layout and structure.
+
+### Styling Changes
+Modify `public/styles.css` to change colors, sizes, and other visual elements. The dashboard uses CSS variables for easy theming:
+
+\`\`\`css
+:root {
+    --bg-color: #F5E6D3;     /* Background color */
+    --primary-color: #2A9D8F; /* Main accent color */
+    --text-color: #264653;    /* Primary text color */
+    /* ... other variables ... */
+}
+\`\`\`
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Cannot connect to Home Assistant**
+   - Verify your Home Assistant URL and port
+   - Check if your token is valid
+   - Ensure Home Assistant is accessible from your network
+
+2. **Missing sensors**
+   - Check your entity IDs in Home Assistant
+   - Verify your sensor identification keywords in `.env`
+   - Look for typos in excluded entities
+
+3. **WebSocket connection issues**
+   - Check your browser console for errors
+   - Verify your network connection
+   - Restart the Node.js server
+
+### Getting Help
+
+If you encounter issues:
+1. Check the server console for error messages
+2. Look at your browser's developer tools console
+3. Review your `.env` configuration
+4. Create an issue in the GitHub repository with:
+   - Your error messages
+   - Your configuration (remove sensitive data)
+   - Steps to reproduce the issue
+
+## Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## Security Notes
+
+- Never commit your `.env` file
+- Keep your Home Assistant token secret
+- Regularly update your dependencies
+- Run `npm audit` periodically to check for vulnerabilities
+
+
+```
+
 # server.js
 
 ```js
+require('dotenv').config();
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const cron = require('node-cron');
-const app = express();
-const port = 3000;
+const WebSocket = require('ws');
+const http = require('http');
 
-// Function to calculate "time ago" in human-readable format
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+const port = process.env.PORT || 3015;
+const dataPath = path.join(__dirname, process.env.DATA_PATH);
+
+// Parse comma-separated environment variables into arrays
+const excludedTemperatureKeywords = process.env.EXCLUDED_TEMPERATURE_KEYWORDS.split(',');
+const excludedEntities = process.env.EXCLUDED_TEMPERATURE_ENTITIES.split(',');
+const temperatureIdentifiers = process.env.TEMPERATURE_IDENTIFIERS.split(',');
+const humidityIdentifiers = process.env.HUMIDITY_IDENTIFIERS.split(',');
+const airQualityIdentifiers = process.env.AIR_QUALITY_IDENTIFIERS.split(',');
+
+let sensorData = {
+  temperatureSensors: [],
+  humiditySensors: [],
+  airQualitySensors: []
+};
+
 function timeAgo(timestamp) {
   const now = new Date();
   const time = new Date(timestamp);
-  const diff = Math.floor((now - time) / 1000); // Difference in seconds
-
+  const diff = Math.floor((now - time) / 1000);
+  
   if (diff < 60) return `${diff} seconds ago`;
   const minutes = Math.floor(diff / 60);
   if (minutes < 60) return `${minutes} minutes ago`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours} hours ago`;
-  const days = Math.floor(hours / 24);
-  return `${days} days ago`;
+  return `${Math.floor(hours / 24)} days ago`;
 }
 
-// Path to the output.json file
-const dataPath = path.join(__dirname, 'output.json');
-let temperatureSensors = [];
-let humiditySensors = [];
-let airQualitySensors = [];
+function broadcastData() {
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(sensorData));
+    }
+  });
+}
 
-// Function to fetch data using curl
+function formatSensorData(sensor) {
+  return {
+    ...sensor,
+    state: Math.round(Number(sensor.state)),
+    time_ago: sensor.last_changed ? timeAgo(sensor.last_changed) : 'Unknown'
+  };
+}
+
+function isValidState(state) {
+  return !['unavailable', 'unknown', ''].includes(state.toLowerCase());
+}
+
+function processSensorData(allData) {
+  // Temperature sensors
+  sensorData.temperatureSensors = allData
+    .filter(entity => {
+      const isTemperature = temperatureIdentifiers.some(id => 
+        entity.entity_id.toLowerCase().includes(id)) ||
+        entity.attributes?.device_class === 'temperature';
+      const notExcluded = !excludedTemperatureKeywords.some(keyword => 
+        (entity.attributes?.friendly_name || '').toLowerCase().includes(keyword));
+      const notExcludedEntity = !excludedEntities.includes(entity.entity_id);
+      return isTemperature && isValidState(entity.state) && notExcluded && notExcludedEntity;
+    })
+    .map(formatSensorData);
+
+  // Humidity sensors
+  sensorData.humiditySensors = allData
+    .filter(entity => {
+      const isHumidity = humidityIdentifiers.some(id => 
+        entity.entity_id.toLowerCase().includes(id)) ||
+        entity.attributes?.device_class === 'humidity';
+      return isHumidity && isValidState(entity.state);
+    })
+    .map(formatSensorData);
+
+  // Air quality sensors
+  sensorData.airQualitySensors = allData
+    .filter(entity => {
+      const isAirQuality = airQualityIdentifiers.some(id => 
+        entity.entity_id.toLowerCase().includes(id)) ||
+        entity.attributes?.device_class?.includes('air_quality');
+      return isAirQuality && isValidState(entity.state);
+    })
+    .map(formatSensorData);
+}
+
+function loadData() {
+  try {
+    const rawData = fs.readFileSync(dataPath, 'utf8');
+    const allData = JSON.parse(rawData);
+    processSensorData(allData);
+    broadcastData();
+  } catch (error) {
+    console.error('Error loading or parsing data:', error.message);
+  }
+}
+
 function fetchData() {
   const curlCommand = `
-    curl -X GET -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiZWY3MzNjYjgyNWY0ZTJiYTc3ZWViZmJjYzI0OWM0ZSIsImlhdCI6MTczMzcwMjIxNCwiZXhwIjoyMDQ5MDYyMjE0fQ.bsqk7aBqJyNG93Dw_-71Ys7S_rph6OD2k-9KzA3tpEg" \
-         -H "Content-Type: application/json" \
-         http://homeassistant.local:8123/api/states > ${dataPath}
+    curl -X GET -H "Authorization: Bearer ${process.env.HA_BEARER_TOKEN}" \
+    -H "Content-Type: application/json" \
+    ${process.env.HA_API_URL} > ${dataPath}
   `;
 
   exec(curlCommand, (error, stdout, stderr) => {
@@ -286,96 +545,58 @@ function fetchData() {
     if (stderr) {
       console.error(`Curl stderr: ${stderr}`);
     }
-    console.log('Data fetched and saved to output.json');
     loadData();
   });
 }
 
-function loadData() {
-  try {
-    const rawData = fs.readFileSync(dataPath, 'utf8');
-    const allData = JSON.parse(rawData);
-
-    // Keywords to exclude for temperature
-    const excludedTemperatureKeywords = ["home realfeel temperature", "target temperature", "processor temperature", "bed", "nozzle"];
-    const excludedEntities = ["number.oven_upper_temperature", "number.oven_lower_temperature"];
-
-    // Filter temperature sensors
-    temperatureSensors = allData.filter((entity) => {
-      const isTemperature = entity.entity_id.toLowerCase().includes('temperature') ||
-                            (entity.attributes?.device_class || '').toLowerCase() === 'temperature';
-      const isValidState = entity.state.toLowerCase() !== 'unavailable' &&
-                           entity.state.toLowerCase() !== 'unknown' &&
-                           entity.state !== '';
-      const isNotExcluded = !excludedTemperatureKeywords.some((keyword) =>
-        (entity.attributes?.friendly_name || '').toLowerCase().includes(keyword)
-      );
-      const isNotExcludedEntity = !excludedEntities.includes(entity.entity_id);
-      const isNotZeroForOven = !(excludedEntities.includes(entity.entity_id) && parseFloat(entity.state) === 0);
-      return isTemperature && isValidState && isNotExcluded && isNotExcludedEntity && isNotZeroForOven;
-    }).map((sensor) => ({
-      ...sensor,
-      state: Math.round(Number(sensor.state)), // Round state to the nearest whole number
-      time_ago: sensor.last_changed ? timeAgo(sensor.last_changed) : 'Unknown',
-    }));
-
-    // Filter humidity sensors
-    humiditySensors = allData.filter((entity) => {
-      const isHumidity = entity.entity_id.toLowerCase().includes('humidity') ||
-                         (entity.attributes?.device_class || '').toLowerCase() === 'humidity';
-      const isValidState = entity.state.toLowerCase() !== 'unavailable' &&
-                           entity.state.toLowerCase() !== 'unknown' &&
-                           entity.state !== '';
-      return isHumidity && isValidState;
-    }).map((sensor) => ({
-      ...sensor,
-      state: Math.round(Number(sensor.state)), // Round state to the nearest whole number
-      time_ago: sensor.last_changed ? timeAgo(sensor.last_changed) : 'Unknown',
-    }));
-
-    // Filter air quality sensors (AQI, VOCs, and Indoor Air Quality)
-    airQualitySensors = allData.filter((entity) => {
-      const isAirQuality = entity.entity_id.toLowerCase().includes('aqi') ||
-                           entity.entity_id.toLowerCase().includes('voc') ||
-                           entity.entity_id.toLowerCase().includes('quality_indoor_air_quality') ||
-                           (entity.attributes?.device_class || '').toLowerCase().includes('air_quality');
-      const isValidState = entity.state.toLowerCase() !== 'unavailable' &&
-                           entity.state.toLowerCase() !== 'unknown' &&
-                           entity.state !== '';
-      return isAirQuality && isValidState;
-    }).map((sensor) => ({
-      ...sensor,
-      state: Math.round(Number(sensor.state)), // Round state to the nearest whole number
-      time_ago: sensor.last_changed ? timeAgo(sensor.last_changed) : 'Unknown',
-    }));
-  } catch (error) {
-    console.error('Error loading or parsing output.json:', error.message);
-  }
-}
-
-
-
-
-// Schedule the fetchData function to run every 15 minutes
-cron.schedule('*/15 * * * *', () => {
-  console.log('Running scheduled data fetch...');
-  fetchData();
+// WebSocket connection handling
+wss.on('connection', (ws) => {
+  console.log('New client connected');
+  ws.send(JSON.stringify(sensorData));
+  
+  ws.on('error', (error) => {
+    console.error('WebSocket error:', error);
+  });
+  
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
 });
 
-// Initial fetch and load data
-fetchData();
-
+// Setup routes and static files
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-  res.render('index', { temperatureSensors, humiditySensors, airQualitySensors });
+  res.render('index', sensorData);
 });
 
-app.listen(port, () => {
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
+// Schedule data fetching
+cron.schedule(process.env.UPDATE_INTERVAL, fetchData);
+
+// Initial fetch
+fetchData();
+
+// Start server with error handling
+server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
+}).on('error', (error) => {
+  console.error('Server error:', error);
 });
 
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (error) => {
+  console.error('Unhandled Rejection:', error);
+});
 ```
 
 # views/index.ejs
@@ -451,6 +672,41 @@ app.listen(port, () => {
       </div>
     </div>
   </div>
+  <script>
+    const ws = new WebSocket(`ws://${window.location.host}`);
+    
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      updateDashboard(data);
+    };
+  
+    function updateDashboard(data) {
+      ['temperatureSensors', 'humiditySensors', 'airQualitySensors'].forEach(sensorType => {
+        const containers = document.querySelectorAll('.grid-container');
+        const container = containers[
+          sensorType === 'temperatureSensors' ? 0 : 
+          sensorType === 'humiditySensors' ? 1 : 2
+        ];
+        
+        container.innerHTML = data[sensorType].map(sensor => {
+          const isDanger = sensorType === 'temperatureSensors' ? sensor.state < 30 :
+                          sensorType === 'humiditySensors' ? sensor.state > 40 :
+                          (sensor.entity_id.toLowerCase().includes('aqi') && sensor.state > 60) || 
+                          (sensor.entity_id.toLowerCase().includes('indoor_air_quality') && sensor.state < 60);
+  
+          return `
+            <div class="tile ${isDanger ? 'danger' : ''}">
+              <h3>${sensor.attributes.friendly_name}</h3>
+              <div class="value">
+                ${sensor.state}<span class="unit">${sensor.attributes.unit_of_measurement || ''}</span>
+              </div>
+              <div class="last-changed">Updated ${sensor.time_ago}</div>
+            </div>
+          `;
+        }).join('');
+      });
+    }
+  </script>
 </body>
 </html>
 ```
