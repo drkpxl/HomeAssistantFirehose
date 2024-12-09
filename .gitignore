@@ -87,5 +87,6 @@ Desktop.ini
 
 # Local project files
 output.json
-
+.aidigestignore
+codebase.md
 
