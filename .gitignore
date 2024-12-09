@@ -46,29 +46,7 @@ jspm_packages/
 .next/
 out/
 
-# Nuxt.js
-.nuxt/
-dist/
 
-# Vuepress
-.vuepress/dist
-
-# Gatsby files
-.cache/
-public/
-
-# Vue files
-dist/
-
-# Svelte files
-__sapper__/
-sveltekit-output/
-
-# Django stuff:
-*.pyc
-*.pyo
-__pycache__/
-.db.sqlite3
 
 # IDE/Editor specific
 .vscode/
